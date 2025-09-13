@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>CulturaLens AR Viewer</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- A-Frame + AR.js -->
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+
+    <style>
+      body { margin: 0; overflow: hidden; }
+      .back-button {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        padding: 10px 15px;
+        background: rgba(0,0,0,0.6);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        z-index: 1000;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Back button -->
+    <button class="back-button" onclick="window.history.back()">← Back</button>
+
+    <!-- AR.js Scene -->
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+      
+      <!-- Preload model -->
+      <a-assets timeout="300000">
+        <a-asset-item id="tajMahal" src="./assets/taj-mahal.glb"></a-asset-item>
+      </a-assets>
+
+      <a-marker preset="hiro">
+        <a-entity
+        id="temple"
+        gltf-model="#tajMahal"
+        position="0 0 0"
+        scale="0.0022 0.0022 0.0022"
+        rotation="90 180 0"
+        material="metalness: 0.1; roughness: 0.8">
+      </a-entity>
+      
+      </a-marker>
+      
+<a-entity light="type: ambient; intensity: 0.5; color: #ffffff"></a-entity>
+<a-entity light="type: directional; intensity: 1" position="1 1 1"></a-entity>
+<a-entity light="type: point; intensity: 1; distance: 10; decay: 2" position="0 2 2"></a-entity>
+
+      <a-entity camera="fov: 100"></a-entity>
+    </a-scene>
+
+  </body>
+</html>

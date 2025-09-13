@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CulturaLens – Mini MVP</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <div id="prototypeOverlay" style="
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.85);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+  z-index: 5000;
+">
+    <h2>⚠️ Prototype Notice</h2>
+    <p style="max-width:300px; margin:10px 0;">
+      This is a <b>mini MVP prototype</b><br>
+      Make sure to use only <b>Hiro Marker</b> for AR!!
+    </p>
+    <button id="closePrototypeBtn" style="
+    padding: 10px 20px;
+    font-size: 16px;
+    background:#FFD700;
+    color:#111;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+  ">Got it!</button>
+  </div>
+  <header>
+    <div class="wrap row">
+      <img src="logo.png" alt="CulturaLens" class="logo" />
+      <h1><span class="tag">Mini MVP</span></h1>
+      <div class="row header-actions"></div>
+      <input id="search" placeholder="Search (e.g., Golden Temple, Bhangra, Phulkari)" style="min-width:320px" />
+      <button id="contributeBtn">➕ Contribute</button>
+      <button id="logoutBtn" style="
+        background: #FF4136;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+      ">Logout</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <h2 style="margin:0 0 6px">Preserve • Experience • Empower</h2>
+      <p class="muted" style="margin:0;color:var(--muted)">A prototype showing Explore, Virtual Tour, Quiz, and a small
+        Artisan Marketplace for <b>India</b></p>
+    </section>
+
+    <nav class="tabs">
+      <button class="tabbtn active" data-tab="explore">Explore</button>
+      <button class="tabbtn" data-tab="tour">Virtual Tour</button>
+      <button class="tabbtn" data-tab="learn">Learn</button>
+      <button class="tabbtn" data-tab="market">Marketplace</button>
+      <button class="tabbtn" data-tab="personalised">Personal</button>
+    </nav>
+
+    <section id="explore" class="tabpage" style="margin-top:14px">
+      <div class="row" style="gap:8px;margin-bottom:12px">
+        <select id="cat">
+          <option value="All">All Categories</option>
+          <option>Monument</option>
+          <option>Performing Art</option>
+          <option>Craft</option>
+          <option>Festival</option>
+          <option>Cuisine</option>
+        </select>
+        <button id="reset">Reset Filters</button>
+      </div>
+      <div id="exploreGrid" class="grid"></div>
+    </section>
+
+    <section id="tour" class="tabpage hidden" style="margin-top:14px">
+      <div class="grid" style="grid-template-columns:2fr 1fr">
+        <div class="card-img">
+          <img id="heroImg"
+            src="https://plus.unsplash.com/premium_photo-1697730478835-e7764928862c?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fGdvbGRlbiUyMHRlbXBsZXxlbnwwfHwwfHx8MA%3D%3D"
+            alt="Golden Temple" />
+          <div class="pad">
+            <h3 style="margin:0">Immersive Tour</h3>
+            <p class="muted" style="color:var(--muted)">360° viewer</p>
+            <div class="gallery" id="gallery"></div>
+            <div class="row" style="margin-top:8px">
+              <button class="primary">Download Tour</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="pad">
+            <h3 style="margin-top:0">Why it matters</h3>
+            <ul>
+              <li>Inclusive access for remote learners</li>
+              <li>Reduces wear on fragile sites via virtual visits</li>
+              <li>Sparks curiosity before on‑site tourism</li>
+              <li>Gives an idea about what to expect</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="learn" class="tabpage hidden" style="margin-top:14px">
+      <div class="card">
+        <div class="pad">
+          <h3 style="margin-top:0">Cultural Quiz</h3>
+          <div id="quiz"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="market" class="tabpage hidden" style="margin-top:14px">
+      <div class="grid" style="grid-template-columns:2fr 1fr">
+        <div id="shop" class="grid"></div>
+        <div class="card">
+          <div class="pad" style="display:flex; flex-direction:column; height:100%;">
+            <h3 style="margin-top:0">Cart</h3>
+            <table class="table" id="cart"></table>
+            <div class="row" style="justify-content:space-between;margin-top:8px"><b>Total</b><b id="total">₹0</b></div>
+            <button class="primary" style="width:100%;margin-top:10px">Checkout</button>
+          </div>
+        </div>
+      </div>
+      </div>
+    </section>
+    <section id="personalised" class="tabpage hidden" style="margin-top:14px">
+      <div class="grid" id="personalGrid"></div>
+    </section>
+
+  </main>
+
+  <footer>Built for Hackshastra 2025 by DevNull Tracers • Prototype Only</footer>
+
+  <script>
+
+    if (localStorage.getItem('isLoggedIn') !== 'true') {
+      window.location.href = 'signin.html';
+    }
+
+    const protoOverlay = document.getElementById('prototypeOverlay');
+    const closeBtn = document.getElementById('closePrototypeBtn');
+    closeBtn.addEventListener('click', () => {
+      protoOverlay.style.display = 'none';
+    });
+
+    document.querySelectorAll("button").forEach((t) => {
+      t.addEventListener("click", () => {
+        t.classList.remove("clicked"), t.offsetWidth, t.classList.add("clicked");
+      });
+    });
+    const ITEMS = [
+      {
+        id: 1,
+        name: "Golden Temple (Harmandir Sahib)",
+        cat: "Monument",
+        state: "Punjab",
+        img: "https://plus.unsplash.com/premium_photo-1697730478835-e7764928862c?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fGdvbGRlbiUyMHRlbXBsZXxlbnwwfHwwfHx8MA%3D%3D",
+        blurb: "Sikhism’s holiest gurdwara in Amritsar, famed for its gilded sanctum",
+        blurb1: "The Golden Temple (Sri Harmandir Sahib) is the holiest Sikh shrine, located in Amritsar, Punjab, India, known for its gleaming gold-covered domes and tranquil atmosphere in the middle of a sacred lake. As a symbol of Sikh principles like equality and community, it features four entrances to welcome all people. It houses the world's largest community kitchen (langar) serving free meals to visitors, fostering unity and service through its daily operations and vegetarian offerings."
+      },
+      {
+        id: 2,
+        name: "Taj Mahal",
+        cat: "Monument", state: "Uttar Pradesh",
+        img: "https://vwitours.com/wp-content/uploads/2023/04/Agra-tajmahal.jpeg",
+        blurb: "Ivory-white marble mausoleum in Agra, India, commissioned by Mughal emperor Shah Jahan",
+        blurb1: "The Taj Mahal is an ivory-white marble mausoleum in Agra, India, built by the Mughal emperor Shah Jahan in memory of his wife, Mumtaz Mahal, after her death in 1631."
+      },
+      {
+        id: 3,
+        name: "Ellora Caves",
+        cat: "Monument",
+        state: "Maharashtra",
+        img: "https://s7ap1.scene7.com/is/image/incredibleindia/ellora-caves-chhatrapati-sambhaji-nagar-maharashtra-attr-hero-5?qlt=82&ts=1727010646173",
+        blurb: "34 caves featuring representing a harmonious blend of Hindu, Buddhist and Jain architecture",
+        blurb1: "The Ellora Caves are a complex of 34 rock-cut cave temples and monasteries, showcasing a remarkable blend of Buddhist, Hindu, and Jain traditions from the 6th to the 12th centuries CE, illustrating ancient India's religious harmony and artistic excellence."
+      },
+      {
+        id: 4,
+        name: "India Gate",
+        cat: "Monument",
+        state: "New Delhi",
+        img: "https://www.culturalindia.net/iliimages/India-Gate-ili-49-img-1.jpg",
+        blurb: "War memorial arch that commemorates the 70,000 Indian and British soldiers who died in World War",
+        blurb1: "India Gate is a majestic 42-meter-high war memorial in New Delhi, designed by Sir Edwin Lutyens and built in 1931 to honor the 70,000 Indian soldiers who died in World War I and the Third Anglo-Afghan War."
+      },
+      {
+        id: 5,
+        name: "Ram Mandir",
+        cat: "Monument",
+        state: "Uttar Pradesh",
+        img: "https://c.ndtvimg.com/2023-12/na2ncado_ram-mandir-3d_625x300_27_December_23.jpg",
+        blurb: "Hindu temple dedicated to Lord Rama, built at his supposed birthplace, marking a symbolic victory and a significant cultural event for India",
+        blurb1: "The Ayodhya Ram Mandir is a major Hindu temple in Ayodhya, Uttar Pradesh, India, dedicated to Lord Rama, a principal deity in Hinduism, and built at his supposed birthplace. The temple complex is a significant religious and cultural landmark, symbolizing the deep connection between the site, the ancient epic Ramayana, and Hindu faith."
+      },
+      {
+        id: 6,
+        name: "Garba",
+        cat: "Performing Art",
+        state: "Gujarat",
+        img: "https://www.artidea.org/files/styles/large/public/landing-pages/webevent1180x700px2_0.png",
+        blurb: "Traditional folk dance of people of Gujarat",
+        blurb1: "Garba is a joyful, ritualistic Gujarati folk dance performed during the nine-night Hindu festival of Navratri, dedicated to the goddess Durga.It is a sacred and ritualistic dance, focused on the worship of the feminine divine energy or Shakti."
+      },
+      {
+        id: 7,
+        name: "Rauf",
+        cat: "Performing Art",
+        state: "Jammu & Kashmir",
+        img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSDSQSvekhucTHOkjYGJF_Bq5y-xs3pxQpsrg&s",
+        blurb: "Traditional folk dance of women of Jammu & Kashmir",
+        blurb1: "Rauf, also known as Rouf, is a traditional folk dance from the Kashmir Valley performed by women in two facing rows, characterized by simple, rhythmic steps and delicate torso movements forward and backward."
+      },
+      {
+        id: 8,
+        name: "Karagattam",
+        cat: "Performing Art",
+        state: "Tamil Nadu",
+        img: "https://live.staticflickr.com/3239/2980011131_3f7a3819d7.jpg",
+        blurb: "Ancient folk dance of people of Tamil Nadu",
+        blurb1: "Karakattam is an ancient folk dance from Tamil Nadu, India, where performers balance a pot, often a clay or metal one, on their heads while dancing to rhythmic music."
+      },
+      {
+        id: 9,
+        name: "Diwali",
+        cat: "Festival",
+        state: "Mostly northern side of India",
+        img: "https://utsav.gov.in/public/festival_top/1659608853.jpg",
+        blurb: "One of the most celebrated festivals in India. It marks the victory of light over darkness and good over evil",
+        blurb1: "Celebrated by Hindus, Jains, and Sikhs, this festival of lights symbolizes the victory of good over evil. Homes are decorated with lights, and people offer prayers to the goddess Lakshmi, wear new clothes, and exchange gifts."
+      },
+      {
+        id: 10,
+        name: "Eid",
+        cat: "Festival",
+        state: "All over India",
+        img: "https://www.icubelearning.com/project/FSWD718/website1/P9.jpg",
+        blurb: "Eid is a significant festival for Muslims, marked by celebrations, prayers, family gatherings, and charity",
+        blurb1: "Eid refers to the two major Islamic holidays, Eid al-Fitr and Eid al-Adha, which are celebrated by Muslims. Eid al-Fitr marks the end of Ramadan's fasting month with community prayers, festive meals, and charity. Eid al-Adha, the Greater Day is a four-day festival honoring Abraham's willingness to sacrifice his son, characterized by ritual animal sacrifice and sharing meat with family, friends, and the poor."
+      },
+      {
+        id: 11,
+        name: "Bihu",
+        cat: "Festival",
+        state: "Assam",
+        img: "https://jungleideas.files.wordpress.com/2015/11/bihu.jpg",
+        blurb: "Bihu is the most important and joyous festival celebrated in the state of Assam, representing the Assamese New Year and the arrival of spring",
+        blurb1: "Bihu is the national festival of the state of Assam, encompassing three distinct, yet related, festivals celebrated by the Assamese people to mark different stages of the agricultural cycle and the Assamese New Year.",
+      },
+      {
+        id: 12,
+        name: "Durga Puja",
+        cat: "Festival",
+        state: "West Bengal",
+        img: "https://phool.co/cdn/shop/articles/1727818018529how-many-durga-puja-pandals-in-kolkata-exploring-the-enchanting-festival-of-lights_dc195623-5bb6-4658-990e-fe09645529b5_1024x1024.jpg?v=1728039304",
+        blurb: "Durga Puja is a major Hindu festival, especially in West Bengal, celebrating the Goddess Durga's victory over the demon Mahishasura, symbolizing the triumph of good over evil",
+        blurb1: "Durga Puja is a major Hindu festival, particularly popular in West Bengal, India, celebrating the ten-day worship of Goddess Durga and her triumph over the demon Mahishasura, symbolizing the victory of good over evil. Celebrated annually in September or October, the festival involves elaborate rituals, the crafting of artistic Durga idols and temporary structures called pandals, community feasts, cultural events, new clothes, and vibrant processions. It is a time for family and community unity, religious devotion, cultural expression, and is recognized by UNESCO for its cultural significance."
+      },
+    ],
+      TOUR_IMGS = [
+        "https://plus.unsplash.com/premium_photo-1697730478835-e7764928862c?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fGdvbGRlbiUyMHRlbXBsZXxlbnwwfHwwfHx8MA%3D%3D",
+        "https://media.assettype.com/theleaflet/import/wp-content/uploads/2021/09/120337061_gettyimages-1234943959-594x594-1.jpeg?w=1200&h=675&auto=format%2Ccompress&fit=max&enlarge=true",
+        "https://www.trawell.in/admin/images/upload/597529728Amritsar_Wagah_Border_Main.jpg",
+        "https://vwitours.com/wp-content/uploads/2023/04/Agra-tajmahal.jpeg",
+        "https://s7ap1.scene7.com/is/image/incredibleindia/ellora-caves-chhatrapati-sambhaji-nagar-maharashtra-attr-hero-5?qlt=82&ts=1727010646173",
+        "https://www.culturalindia.net/iliimages/India-Gate-ili-49-img-1.jpg"
+
+      ],
+      QUIZ = [
+        { q: "Which city houses the Golden Temple?", options: ["Ludhiana", "Jalandhar", "Amritsar", "Patiala"], correct: 2 },
+        { q: "Phulkari is primarily a…", options: ["Dance", "Embroidery", "Percussion instrument", "Sweet"], correct: 1 },
+        { q: "Lohri is celebrated to mark…", options: ["Onset of monsoon", "End of winter/harvest", "New academic year", "Sikh New Year"], correct: 1 },
+        { q: "The intricate designs on the Taj Mahal's walls are made from which elements?", options: ["Engravings by hand", "Inlaid precious and semi-precious stones", "Carved wood panels", "Painted mosaics"], correct: 1 },
+        { q: "In what year was the Taj Mahal designated a UNESCO World Heritage Site?", options: ["1980", "1983", "1990", "2000"], correct: 1 },
+        { q: "Which of these is considered the most remarkable structure at Ellora, a monolithic temple carved from a single rock?", options: ["The Kailasa Temple", "The Dumar Lena Cave", "The Viswakarma Cave", "The Indra Sabha"], correct: 0 },
+        { q: "Which ruling dynasties were responsible for the creation of the Ellora Caves?", options: ["The Mauryas and Guptas", "The Cholas and Pandyas", "The Kalachuris, Chalukyas, and Rashtrakutas", "The Mughal and Gupta Empires"], correct: 2 },
+        { q: "Hampi is located on the banks of which river?", options: ["Godavari River", "Krishna River", "Tungabhadra River", "Cauvery River"], correct: 2 },
+        { q: "Hampi is the former capital of which powerful South Indian empire?", options: ["Chola Empire", "Mughal Empire", "Vijayanagara Empire", "Maratha Empire"], correct: 2 },
+        { q: "Which dynasty built the Sun Temple at Konark?", options: ["Chola Dynasty", "Eastern Ganga dynasty", "Mughal dynasty", "Pallava dynasty"], correct: 2 },
+        { q: "What famous event is held annually at the Sun Temple, serving as a major cultural celebration and backdrop for Odissi dance?", options: ["The Konark Dance Festival", "The Puri Beach Festival", "The Suncity Festival", "The Konark Festival of Lights"], correct: 0 },
+        { q: "The Ram Mandir in Ayodhya is built in which traditional style of Indian temple architecture?", options: ["Dravidian", "Nagara", "Vesara", "Kalinga"], correct: 1 },
+        { q: "The Ram Janmabhoomi (Ram's birthplace) in Ayodhya is a deeply revered shrine that reflects its rich heritage as the sacred heart of which Indian state?", options: ["Uttar Pradesh", "Rajasthan", "Bihar", "Madhya Pradesh"], correct: 0 },
+      ],
+      SHOP = [
+        { id: "s1", title: "Phulkari Dupatta", price: 1199, maker: "Patiala Women Co‑op", img: "https://images.jdmagicbox.com/quickquotes/images_main/bridal-mirror-work-phulkari-dupatta-multicolor-2228764299-592p1lya.jpg" },
+        { id: "s2", title: "Dholki", price: 699, maker: "Amritsar Crafts", img: "https://5.imimg.com/data5/SELLER/Default/2021/4/TB/OS/QO/4393887/punjabi-dholki-jr.jpg" },
+        { id: "s3", title: "Punjabi Jutti", price: 2249, maker: "Ludhiana Artistry", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSoDXT1SAkXVLP9QjmVouPtMnoMlDLfehK1wQ&s" },
+      ],
+      tabs = document.querySelectorAll(".tabbtn"),
+      pages = { explore: document.getElementById("explore"), tour: document.getElementById("tour"), learn: document.getElementById("learn"), market: document.getElementById("market"), personalised: document.getElementById("personalised") };
+    tabs.forEach((t) =>
+      t.addEventListener("click", () => {
+        tabs.forEach((t) => t.classList.remove("active")), t.classList.add("active"), Object.values(pages).forEach((t) => t.classList.add("hidden")), pages[t.dataset.tab].classList.remove("hidden");
+      })
+    );
+    const grid = document.getElementById("exploreGrid"),
+      q = document.getElementById("search"),
+      cat = document.getElementById("cat"),
+      state = document.getElementById("state"),
+      reset = document.getElementById("reset");
+    function drawExplore() {
+      const t = q.value.toLowerCase(),
+        e = cat.value,
+        a = ITEMS.filter(
+          (a) =>
+            (e === "All" || a.cat === e) &&
+            (a.name.toLowerCase().includes(t) || a.blurb.toLowerCase().includes(t))
+        );
+
+      grid.innerHTML = a
+        .map((t) => {
+          let viewARButton = "";
+
+          if (t.id === 1) {
+            viewARButton = `<button class="primary" onclick="window.location.href='GoldenTempleAR.html'">View AR</button>`;
+          } else if (t.id === 2) {
+            viewARButton = `<button class="primary" onclick="window.location.href='TajMahalAR.html'">View AR</button>`;
+          } else if (t.id === 3) {
+            viewARButton = `<button class="primary" onclick="window.location.href='ElloraCavesAR.html'">View AR</button>`;
+          } else if (t.id === 4) {
+            viewARButton = `<button class="primary" onclick="window.location.href='IndiaGateAR.html'">View AR</button>`;
+          } else if (t.id === 5) {
+            viewARButton = `<button class="primary" onclick="window.location.href='RamMandirAR.html'">View AR</button>`;
+          }
+
+          return `
+    <div class="card" style="position: relative;">
+      <img src="${t.img}" alt="${t.name}" />
+      <div class="pad">
+        <h3 style="margin:0 0 4px">${t.name}</h3>
+        <p class="muted" style="margin:0;color:var(--muted)">${t.blurb}</p>
+        <div style="margin-top:8px">
+          <span class="pill">${t.cat}</span><span class="pill">${t.state}</span>
+        </div>
+        <div class="row" style="margin-top:10px">
+          ${viewARButton}
+          <button onclick="toggleDropdown(this)">Details</button>
+          <button>Save</button>
+        </div>
+
+        <div class="dropdown-content">
+          <p><b>Description:</b> ${t.blurb1}</p>
+        </div>
+      </div>
+    </div>
+`;
+        })
+        .join("");
+    }
+
+    [q, cat].forEach((t) => t.addEventListener("input", drawExplore)),
+      reset.addEventListener("click", () => {
+        (q.value = ""), (cat.value = "All"), drawExplore();
+      }),
+      drawExplore();
+    const hero = document.getElementById("heroImg"),
+      gal = document.getElementById("gallery");
+    (hero.src = TOUR_IMGS[0]),
+      TOUR_IMGS.forEach((t, e) => {
+        const a = document.createElement("div");
+        (a.className = "thumb"),
+          (a.innerHTML = `<img src="${t}">`),
+          (a.onclick = () => {
+            hero.src = t;
+          }),
+          gal.appendChild(a);
+      });
+    const quizRoot = document.getElementById("quiz");
+    let step = 0,
+      score = 0;
+    function drawQ() {
+      if (step >= QUIZ.length)
+        return (
+          (quizRoot.innerHTML = `<p><b>Your Score:</b> ${score}/${QUIZ.length}</p>\n    <div class='row'><button class='primary' id='again'>Retake</button><progress max='100' value='100' style='width:160px'></progress></div>`),
+          void (document.getElementById("again").onclick = () => {
+            (step = 0), (score = 0), drawQ();
+          })
+        );
+      const t = QUIZ[step];
+      (quizRoot.innerHTML =
+        `<p><b>Q${step + 1}.</b> ${t.q}</p>` +
+        t.options.map((t, e) => `<button data-i='${e}' style='display:block;margin:6px 0;width:100%'>${t}</button>`).join("") +
+        `<div style='margin-top:8px'><progress max='100' value='${(step / QUIZ.length) * 100}' style='width:100%'></progress></div>`),
+        [...quizRoot.querySelectorAll("button[data-i]")].forEach(
+          (e) =>
+          (e.onclick = () => {
+            +e.dataset.i === t.correct && score++, step++, drawQ();
+          })
+        );
+    }
+    drawQ();
+    const shop = document.getElementById("shop"),
+      cartTbl = document.getElementById("cart"),
+      totalEl = document.getElementById("total"),
+      cart = {};
+    function drawShop() {
+      (shop.innerHTML = SHOP.map(
+        (t) =>
+          `\n    <div class='card'>\n      <img src='${t.img}' alt='${t.title}'>\n      <div class='pad'>\n        <h3 style='margin:0 0 4px'>${t.title}</h3>\n        <p class='muted' style='margin:0;color:var(--muted)'>by ${t.maker}</p>\n        <div class='row' style='justify-content:space-between;margin-top:8px'><span class='pill'>₹${t.price}</span><button class='primary' data-id='${t.id}'>Add to cart</button></div>\n      </div>\n    </div>`
+      ).join("")),
+        [...shop.querySelectorAll("button[data-id]")].forEach(
+          (t) =>
+          (t.onclick = () => {
+            const e = t.dataset.id;
+            (cart[e] = (cart[e] || 0) + 1), drawCart();
+          })
+        );
+    }
+    function drawCart() {
+      const t = SHOP.filter((t) => cart[t.id])
+        .map((t) => `<tr><td>${t.title} × ${cart[t.id]}</td><td style='text-align:right'>₹${cart[t.id] * t.price}</td></tr>`)
+        .join("");
+      cartTbl.innerHTML = t || "<tr><td colspan='2' class='muted'>Your cart is empty</td></tr>";
+      const e = SHOP.reduce((t, e) => t + (cart[e.id] || 0) * e.price, 0);
+      totalEl.textContent = "₹" + e;
+    }
+    drawShop(),
+      drawCart(),
+      shop.addEventListener("click", (t) => {
+        const e = t.target.closest("button[data-id]");
+        e && (e.classList.remove("clicked"), e.offsetWidth, e.classList.add("clicked"));
+      });
+    const btn = document.getElementById("contributeBtn");
+    btn.addEventListener("click", () => {
+      const t = prompt("Title of your story/artifact:");
+      if (!t) return;
+      const e = { id: Date.now(), name: t, cat: "Community", img: "https://www.shutterstock.com/shutterstock/videos/1111389205/thumb/12.jpg?ip=x480", blurb: "Community‑submitted heritage memory." };
+      ITEMS.unshift(e), drawExplore(), alert("Thank you for contributing! (demo)");
+    });
+
+    function toggleOverlay(id) {
+      const overlay = document.getElementById(`overlay-${id}`);
+      if (overlay.style.display === 'flex') {
+        overlay.style.display = 'none';
+      } else {
+        overlay.style.display = 'flex';
+      }
+    }
+
+    async function drawPersonalised() {
+      const personalGrid = document.getElementById('personalGrid');
+
+      if (!personalGrid) {
+        console.error('Error: #personalGrid element not found in the DOM.');
+        return;
+      }
+
+      const data = await fetchUserData();
+
+      if (data) {
+        const filteredItems = ITEMS.filter(item =>
+          item.state.toLowerCase().includes(data.placeOfInterest.toLowerCase())
+        );
+
+        if (filteredItems.length > 0) {
+          personalGrid.innerHTML = filteredItems
+            .map(t => `
+          <div class="card" style="position: relative;">
+            <img src="${t.img}" alt="${t.name}" />
+            <div class="pad">
+              <h3 style="margin:0 0 4px">${t.name}</h3>
+              <p class="muted" style="margin:0;color:var(--muted)">${t.blurb}</p>
+              <div style="margin-top:8px">
+                <span class="pill">${t.cat}</span><span class="pill">${t.state}</span>
+              </div>
+              <div class="row" style="margin-top:10px">
+                <button onclick="toggleDropdown(this)">Details</button>
+              </div>
+              <div class="dropdown-content">
+                <p><b>Description:</b> ${t.blurb1}</p>
+              </div>
+            </div>
+          </div>
+        `)
+            .join('');
+        } else {
+          personalGrid.innerHTML = `<p>No items found for your place of interest: ${data.placeOfInterest}</p>`;
+        }
+
+      } else {
+        personalGrid.innerHTML = '<p>Failed to load personalized data.</p>';
+      }
+
+    }
+    function toggleDropdown(button) {
+      const card = button.closest('.card');
+      card.classList.toggle('expanded');
+    }
+
+    async function fetchUserData() {
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        console.error('No token found in localStorage');
+        return null;
+      }
+
+      try {
+        const res = await fetch('http://localhost:3000/api/user', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!res.ok) {
+          console.error('Server responded with status:', res.status);
+          throw new Error('Failed to fetch user data');
+        }
+
+        return await res.json();
+      } catch (err) {
+        console.error('Error fetching user data:', err);
+        return null;
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      drawPersonalised()
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('token');
+      window.location.href = 'signin.html';
+    });
+
+  </script>
+</body>
+
+</html>
